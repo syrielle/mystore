@@ -22,6 +22,7 @@ import AtelierDashboard from './pages/admin/AtelierDashboard';
 import AtelierProducts from './pages/admin/AtelierProducts';
 import AtelierProductNew from './pages/admin/AtelierProductNew';
 import AtelierProductEdit from './pages/admin/AtelierProductEdit';
+import AtelierBulkUpload from './pages/admin/AtelierBulkUpload';
 import AtelierStock from './pages/admin/AtelierStock';
 import AtelierOrders from './pages/admin/AtelierOrders';
 import AtelierOrderNew from './pages/admin/AtelierOrderNew';
@@ -64,6 +65,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AtelierProductEdit />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/atelier/upload-masse"
+              element={
+                <ProtectedRoute>
+                  <AtelierBulkUpload />
                 </ProtectedRoute>
               }
             />

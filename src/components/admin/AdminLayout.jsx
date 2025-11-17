@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   Plus,
+  Upload,
   Boxes,
   LogOut,
   Menu,
@@ -45,6 +46,11 @@ const AdminLayout = ({ children }) => {
       name: 'Ajouter un Produit',
       path: '/atelier/produits/nouveau',
       icon: Plus,
+    },
+    {
+      name: 'Upload en Masse',
+      path: '/atelier/upload-masse',
+      icon: Upload,
     },
     {
       name: 'Gestion du Stock',
