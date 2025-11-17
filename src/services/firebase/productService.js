@@ -23,7 +23,7 @@ const productsCollection = collection(db, 'products');
  * Upload une image vers Firebase Storage
  * @param {File} file - Le fichier image
  * @param {string} productId - L'ID du produit
- * @param {string} imageType - 'main' ou 'hover'
+ * @param {string} imageType - 'main', 'image2', ou 'image3'
  * @returns {Promise<string>} L'URL de l'image uploadée
  */
 export const uploadProductImage = async (file, productId, imageType = 'main') => {
@@ -68,10 +68,11 @@ export const deleteProductImage = async (imageUrl) => {
  * Créer un nouveau produit
  * @param {Object} productData - Les données du produit
  * @param {File} mainImageFile - Fichier image principale
- * @param {File|null} hoverImageFile - Fichier image hover (optionnel)
+ * @param {File|null} image2File - Fichier image 2 (optionnel)
+ * @param {File|null} image3File - Fichier image 3 (optionnel)
  * @returns {Promise<Object>} Le produit créé
  */
-export const createProduct = async (productData, mainImageFile, hoverImageFile = null) => {
+export const createProduct = async (productData, mainImageFile, image2File = null, image3File = null) => {
   try {
     // Générer un ID temporaire pour le produit
     const tempId = `prod_${Date.now()}`;
@@ -79,17 +80,24 @@ export const createProduct = async (productData, mainImageFile, hoverImageFile =
     // Upload de l'image principale
     const mainImageUrl = await uploadProductImage(mainImageFile, tempId, 'main');
 
-    // Upload de l'image hover si fournie
-    let hoverImageUrl = null;
-    if (hoverImageFile) {
-      hoverImageUrl = await uploadProductImage(hoverImageFile, tempId, 'hover');
+    // Upload de l'image 2 si fournie
+    let image2Url = null;
+    if (image2File) {
+      image2Url = await uploadProductImage(image2File, tempId, 'image2');
+    }
+
+    // Upload de l'image 3 si fournie
+    let image3Url = null;
+    if (image3File) {
+      image3Url = await uploadProductImage(image3File, tempId, 'image3');
     }
 
     // Créer le produit dans Firestore
     const productToCreate = {
       ...productData,
       image: mainImageUrl,
-      imageHover: hoverImageUrl,
+      image2: image2Url,
+      image3: image3Url,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -158,14 +166,16 @@ export const getProductById = async (productId) => {
  * @param {string} productId - L'ID du produit
  * @param {Object} productData - Les nouvelles données
  * @param {File|null} mainImageFile - Nouveau fichier image principale (optionnel)
- * @param {File|null} hoverImageFile - Nouveau fichier image hover (optionnel)
+ * @param {File|null} image2File - Nouveau fichier image 2 (optionnel)
+ * @param {File|null} image3File - Nouveau fichier image 3 (optionnel)
  * @returns {Promise<Object>} Le produit mis à jour
  */
 export const updateProduct = async (
   productId,
   productData,
   mainImageFile = null,
-  hoverImageFile = null
+  image2File = null,
+  image3File = null
 ) => {
   try {
     const docRef = doc(db, 'products', productId);
@@ -186,14 +196,24 @@ export const updateProduct = async (
       updateData.image = await uploadProductImage(mainImageFile, productId, 'main');
     }
 
-    // Upload nouvelle image hover si fournie
-    if (hoverImageFile) {
-      // Supprimer l'ancienne image hover
-      if (currentProduct.imageHover) {
-        await deleteProductImage(currentProduct.imageHover);
+    // Upload nouvelle image 2 si fournie
+    if (image2File) {
+      // Supprimer l'ancienne image 2
+      if (currentProduct.image2) {
+        await deleteProductImage(currentProduct.image2);
       }
       // Upload la nouvelle
-      updateData.imageHover = await uploadProductImage(hoverImageFile, productId, 'hover');
+      updateData.image2 = await uploadProductImage(image2File, productId, 'image2');
+    }
+
+    // Upload nouvelle image 3 si fournie
+    if (image3File) {
+      // Supprimer l'ancienne image 3
+      if (currentProduct.image3) {
+        await deleteProductImage(currentProduct.image3);
+      }
+      // Upload la nouvelle
+      updateData.image3 = await uploadProductImage(image3File, productId, 'image3');
     }
 
     await updateDoc(docRef, updateData);
@@ -222,8 +242,11 @@ export const deleteProduct = async (productId) => {
     if (product.image) {
       await deleteProductImage(product.image);
     }
-    if (product.imageHover) {
-      await deleteProductImage(product.imageHover);
+    if (product.image2) {
+      await deleteProductImage(product.image2);
+    }
+    if (product.image3) {
+      await deleteProductImage(product.image3);
     }
 
     // Supprimer le document Firestore

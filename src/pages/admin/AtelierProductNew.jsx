@@ -26,10 +26,12 @@ const AtelierProductNew = () => {
     discount: 0,
   });
 
-  const [mainImage, setMainImage] = useState(null);
-  const [mainImagePreview, setMainImagePreview] = useState(null);
-  const [hoverImage, setHoverImage] = useState(null);
-  const [hoverImagePreview, setHoverImagePreview] = useState(null);
+  const [image1, setImage1] = useState(null);
+  const [image1Preview, setImage1Preview] = useState(null);
+  const [image2, setImage2] = useState(null);
+  const [image2Preview, setImage2Preview] = useState(null);
+  const [image3, setImage3] = useState(null);
+  const [image3Preview, setImage3Preview] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -56,56 +58,50 @@ const AtelierProductNew = () => {
     }
   };
 
-  // Gérer l'upload de l'image principale
-  const handleMainImageChange = (e) => {
+  // Fonction générique pour gérer l'upload d'image
+  const handleImageChange = (e, imageNumber) => {
     const file = e.target.files[0];
     if (file) {
       // Vérifier le type
       if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, mainImage: 'Le fichier doit être une image' }));
+        setErrors(prev => ({ ...prev, [`image${imageNumber}`]: 'Le fichier doit être une image' }));
         return;
       }
       // Vérifier la taille (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, mainImage: 'L\'image ne doit pas dépasser 5MB' }));
+        setErrors(prev => ({ ...prev, [`image${imageNumber}`]: 'L\'image ne doit pas dépasser 5MB' }));
         return;
       }
 
-      setMainImage(file);
-      setMainImagePreview(URL.createObjectURL(file));
-      setErrors(prev => ({ ...prev, mainImage: null }));
+      const preview = URL.createObjectURL(file);
+
+      if (imageNumber === 1) {
+        setImage1(file);
+        setImage1Preview(preview);
+      } else if (imageNumber === 2) {
+        setImage2(file);
+        setImage2Preview(preview);
+      } else if (imageNumber === 3) {
+        setImage3(file);
+        setImage3Preview(preview);
+      }
+
+      setErrors(prev => ({ ...prev, [`image${imageNumber}`]: null }));
     }
   };
 
-  // Gérer l'upload de l'image hover
-  const handleHoverImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, hoverImage: 'Le fichier doit être une image' }));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, hoverImage: 'L\'image ne doit pas dépasser 5MB' }));
-        return;
-      }
-
-      setHoverImage(file);
-      setHoverImagePreview(URL.createObjectURL(file));
-      setErrors(prev => ({ ...prev, hoverImage: null }));
+  // Fonction générique pour supprimer une image
+  const removeImage = (imageNumber) => {
+    if (imageNumber === 1) {
+      setImage1(null);
+      setImage1Preview(null);
+    } else if (imageNumber === 2) {
+      setImage2(null);
+      setImage2Preview(null);
+    } else if (imageNumber === 3) {
+      setImage3(null);
+      setImage3Preview(null);
     }
-  };
-
-  // Supprimer l'image principale
-  const removeMainImage = () => {
-    setMainImage(null);
-    setMainImagePreview(null);
-  };
-
-  // Supprimer l'image hover
-  const removeHoverImage = () => {
-    setHoverImage(null);
-    setHoverImagePreview(null);
   };
 
   // Valider le formulaire
@@ -118,7 +114,7 @@ const AtelierProductNew = () => {
     if (formData.price > 30) newErrors.price = 'Le prix ne doit pas dépasser 30$';
     if (!formData.category) newErrors.category = 'La catégorie est requise';
     if (!formData.stock || formData.stock < 0) newErrors.stock = 'Le stock doit être supérieur ou égal à 0';
-    if (!mainImage) newErrors.mainImage = 'L\'image principale est requise';
+    if (!image1) newErrors.image1 = 'L\'image principale est requise';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -148,7 +144,7 @@ const AtelierProductNew = () => {
       };
 
       // Créer le produit avec upload d'images
-      await createProduct(productData, mainImage, hoverImage);
+      await createProduct(productData, image1, image2, image3);
 
       alert('Produit créé avec succès!');
       navigate('/atelier/produits');
@@ -158,6 +154,62 @@ const AtelierProductNew = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Composant réutilisable pour l'upload d'image
+  const ImageUploadBox = ({ imageNumber, preview, required = false }) => {
+    const label = imageNumber === 1 ? 'Image Principale' : `Image ${imageNumber}`;
+
+    return (
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {label} {required && <span className="text-red-500">*</span>}
+          {!required && <span className="text-gray-400">(Optionnel)</span>}
+        </label>
+        {!preview ? (
+          <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              {imageNumber === 1 ? (
+                <Upload className="w-12 h-12 text-gray-400 mb-3" />
+              ) : (
+                <ImageIcon className="w-12 h-12 text-gray-400 mb-3" />
+              )}
+              <p className="mb-2 text-sm text-gray-500 font-medium">
+                Cliquer pour uploader
+              </p>
+              <p className="text-xs text-gray-400">PNG, JPG, WEBP (max. 5MB)</p>
+            </div>
+            <input
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, imageNumber)}
+            />
+          </label>
+        ) : (
+          <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-300">
+            <img
+              src={preview}
+              alt={`Preview ${imageNumber}`}
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => removeImage(imageNumber)}
+              className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        {errors[`image${imageNumber}`] && (
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="w-4 h-4" />
+            {errors[`image${imageNumber}`]}
+          </p>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -180,97 +232,14 @@ const AtelierProductNew = () => {
           {/* Upload Images */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Images du Produit</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Ajoutez jusqu'à 3 images pour montrer différents angles de votre bijou
+            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Image Principale */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image Principale <span className="text-red-500">*</span>
-                </label>
-                {!mainImagePreview ? (
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                      <p className="mb-2 text-sm text-gray-500 font-medium">
-                        Cliquer pour uploader
-                      </p>
-                      <p className="text-xs text-gray-400">PNG, JPG, WEBP (max. 5MB)</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleMainImageChange}
-                    />
-                  </label>
-                ) : (
-                  <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-300">
-                    <img
-                      src={mainImagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeMainImage}
-                      className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                {errors.mainImage && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.mainImage}
-                  </p>
-                )}
-              </div>
-
-              {/* Image Hover (Optionnel) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image Hover <span className="text-gray-400">(Optionnel)</span>
-                </label>
-                {!hoverImagePreview ? (
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <ImageIcon className="w-12 h-12 text-gray-400 mb-3" />
-                      <p className="mb-2 text-sm text-gray-500 font-medium">
-                        Cliquer pour uploader
-                      </p>
-                      <p className="text-xs text-gray-400">PNG, JPG, WEBP (max. 5MB)</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleHoverImageChange}
-                    />
-                  </label>
-                ) : (
-                  <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-300">
-                    <img
-                      src={hoverImagePreview}
-                      alt="Preview hover"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeHoverImage}
-                      className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                {errors.hoverImage && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.hoverImage}
-                  </p>
-                )}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <ImageUploadBox imageNumber={1} preview={image1Preview} required={true} />
+              <ImageUploadBox imageNumber={2} preview={image2Preview} />
+              <ImageUploadBox imageNumber={3} preview={image3Preview} />
             </div>
           </div>
 

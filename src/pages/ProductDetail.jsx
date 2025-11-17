@@ -12,6 +12,7 @@ import {
 import { useCart } from '../context/CartContext';
 import Button from '../components/ui/Button';
 import { getProductById } from '../services/firebase/productService';
+import ProductImageGallery from '../components/ui/ProductImageGallery';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -104,36 +105,34 @@ const ProductDetail = () => {
 
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image du produit */}
+          {/* Galerie d'images du produit */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             className="relative"
           >
             <div className="sticky top-24">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-xl">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
+              <div className="relative">
+                <ProductImageGallery
+                  images={[product.image, product.image2, product.image3].filter(Boolean)}
                 />
 
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                   {product.isNew && (
-                    <span className="bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                    <span className="bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                       Nouveau
                     </span>
                   )}
                   {product.discount > 0 && (
-                    <span className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                    <span className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                       -{product.discount}%
                     </span>
                   )}
                 </div>
 
                 {/* Actions rapides */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
                   <button className="bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors">
                     <Heart className="w-5 h-5 text-gray-700" />
                   </button>
