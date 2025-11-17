@@ -166,8 +166,7 @@ const AtelierProducts = () => {
                   </tr>
                 ) : (
                   filteredProducts.map((product) => {
-                    // Simuler un stock aléatoire pour l'instant
-                    const stock = Math.floor(Math.random() * 25) + 1;
+                    const stock = product.stock || 0;
                     const lowStock = stock < 5;
 
                     return (
