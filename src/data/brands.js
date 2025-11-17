@@ -15,4 +15,4 @@ export const brandLogos = [
 ];
 
 // Image/vidéo pour la section Radiance
-export const radianceMedia = 'https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?w=1200&q=80';
+export const radianceMedia = 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=1200&q=80';
