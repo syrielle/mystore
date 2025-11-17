@@ -41,7 +41,7 @@ const AtelierBulkUpload = () => {
       preview: URL.createObjectURL(file),
       name: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '), // Nom du fichier sans extension
       description: '',
-      price: '',
+      price: '15',
       category: 'Colliers',
       stock: '10',
       isNew: false,
@@ -69,9 +69,14 @@ const AtelierBulkUpload = () => {
   // Valider un produit
   const validateProduct = (product) => {
     if (!product.name.trim()) return 'Le nom est requis';
-    if (!product.price || product.price <= 0) return 'Prix invalide';
-    if (product.price > 30) return 'Prix max 30$';
-    if (!product.stock || product.stock < 0) return 'Stock invalide';
+
+    const price = parseFloat(product.price);
+    if (!product.price || isNaN(price) || price <= 0) return 'Prix invalide';
+    if (price > 30) return 'Prix max 30$';
+
+    const stock = parseInt(product.stock);
+    if (product.stock === '' || isNaN(stock) || stock < 0) return 'Stock invalide';
+
     return null;
   };
 
@@ -82,7 +87,12 @@ const AtelierBulkUpload = () => {
     const hasErrors = errors.some(e => e !== null);
 
     if (hasErrors) {
-      alert('Certains produits ont des erreurs. Veuillez les corriger.');
+      const errorMessages = productsData
+        .map((p, i) => errors[i] ? `${p.name}: ${errors[i]}` : null)
+        .filter(e => e !== null)
+        .join('\n');
+
+      alert(`Certains produits ont des erreurs:\n\n${errorMessages}`);
       return;
     }
 
