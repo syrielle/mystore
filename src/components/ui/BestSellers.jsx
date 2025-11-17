@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import ProductCardSimple from './ProductCardSimple';
 
-const BestSellers = ({ featuredImage, products }) => {
+const BestSellers = ({ products }) => {
   return (
     <section className="py-16 bg-[#f5f3f0] w-full">
       {/* Titre */}
@@ -24,32 +24,11 @@ const BestSellers = ({ featuredImage, products }) => {
 
       {/* Contenu */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-          {/* Image mise en avant - gauche */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="lg:col-span-1 hidden lg:block"
-          >
-            <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
-              <img
-                src={featuredImage}
-                alt="Featured Collection"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </motion.div>
-
-          {/* Grille de produits - droite */}
-          <div className="lg:col-span-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <ProductCardSimple key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
+        {/* Grille de produits */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCardSimple key={product.id} product={product} />
+          ))}
         </div>
       </div>
     </section>
