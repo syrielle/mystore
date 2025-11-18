@@ -16,6 +16,8 @@ const AtelierProducts = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [deleting, setDeleting] = useState(false);
 
   // Charger les produits depuis Firestore
   useEffect(() => {
@@ -61,6 +63,56 @@ const AtelierProducts = () => {
         console.error('Erreur lors de la suppression:', error);
         alert('Erreur lors de la suppression du produit');
       }
+    }
+  };
+
+  // Sélectionner/désélectionner un produit
+  const toggleProductSelection = (productId) => {
+    setSelectedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Sélectionner/désélectionner tous les produits filtrés
+  const toggleSelectAll = () => {
+    if (selectedProducts.length === filteredProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(filteredProducts.map(p => p.id));
+    }
+  };
+
+  // Supprimer les produits sélectionnés
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) {
+      alert('Aucun produit sélectionné');
+      return;
+    }
+
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${selectedProducts.length} produit(s) ?`)) {
+      setDeleting(true);
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const productId of selectedProducts) {
+        try {
+          await deleteProduct(productId);
+          successCount++;
+        } catch (error) {
+          console.error(`Erreur lors de la suppression de ${productId}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Recharger les produits
+      const updatedProducts = await getAllProducts();
+      setAllProducts(updatedProducts);
+      setSelectedProducts([]);
+      setDeleting(false);
+
+      alert(`${successCount} produit(s) supprimé(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}!`);
     }
   };
 
@@ -115,6 +167,23 @@ const AtelierProducts = () => {
               </select>
             </div>
           </div>
+
+          {/* Actions en masse */}
+          {selectedProducts.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+              <span className="text-sm text-gray-600">
+                <span className="font-semibold text-gray-900">{selectedProducts.length}</span> produit(s) sélectionné(s)
+              </span>
+              <button
+                onClick={handleBulkDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-4 h-4" />
+                {deleting ? 'Suppression...' : 'Supprimer la sélection'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Tableau des produits */}
@@ -131,6 +200,14 @@ const AtelierProducts = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-6 py-4 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                    />
+                  </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Produit
                   </th>
@@ -154,7 +231,7 @@ const AtelierProducts = () => {
               <tbody className="divide-y divide-gray-200">
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center">
+                    <td colSpan="7" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-2">
                         <AlertCircle className="w-12 h-12 text-gray-400" />
                         <p className="text-gray-500 font-medium">Aucun produit trouvé</p>
@@ -171,6 +248,14 @@ const AtelierProducts = () => {
 
                     return (
                       <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => toggleProductSelection(product.id)}
+                            className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                          />
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-4">
                             <img
