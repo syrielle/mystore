@@ -1,30 +1,7 @@
 import { motion } from 'framer-motion';
 import { Mail, Phone, MessageSquare, Send, MapPin } from 'lucide-react';
-import { useState } from 'react';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // For now, we'll create a WhatsApp message with the form data
-    const message = `*NOUVEAU MESSAGE DE CONTACT*\n\nNom: ${formData.name}\nEmail: ${formData.email}\nTéléphone: ${formData.phone}\nSujet: ${formData.subject}\n\nMessage:\n${formData.message}`;
-    const whatsappUrl = `https://wa.me/11234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
@@ -121,7 +98,16 @@ const Contact = () => {
               Envoyez-nous un Message
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              action="https://formsubmit.co/missbijoux761@gmail.com"
+              method="POST"
+              className="space-y-6"
+            >
+              {/* Champs cachés FormSubmit */}
+              <input type="hidden" name="_subject" value="Nouveau message de contact - Miss Bijoux" />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_template" value="table" />
+
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -132,8 +118,6 @@ const Contact = () => {
                   id="name"
                   name="name"
                   required
-                  value={formData.name}
-                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
                   placeholder="Votre nom"
                 />
@@ -149,8 +133,6 @@ const Contact = () => {
                   id="email"
                   name="email"
                   required
-                  value={formData.email}
-                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
                   placeholder="votre@email.com"
                 />
@@ -165,8 +147,6 @@ const Contact = () => {
                   type="tel"
                   id="phone"
                   name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
                   placeholder="+1 (123) 456-7890"
                 />
@@ -181,16 +161,14 @@ const Contact = () => {
                   id="subject"
                   name="subject"
                   required
-                  value={formData.subject}
-                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
                 >
                   <option value="">Sélectionnez un sujet</option>
-                  <option value="info-produit">Information sur un produit</option>
-                  <option value="commande">Question sur une commande</option>
-                  <option value="retour">Retour ou échange</option>
-                  <option value="partenariat">Opportunité de partenariat</option>
-                  <option value="autre">Autre</option>
+                  <option value="Information sur un produit">Information sur un produit</option>
+                  <option value="Question sur une commande">Question sur une commande</option>
+                  <option value="Retour ou échange">Retour ou échange</option>
+                  <option value="Opportunité de partenariat">Opportunité de partenariat</option>
+                  <option value="Autre">Autre</option>
                 </select>
               </div>
 
@@ -203,8 +181,6 @@ const Contact = () => {
                   id="message"
                   name="message"
                   required
-                  value={formData.message}
-                  onChange={handleChange}
                   rows="5"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors resize-none"
                   placeholder="Écrivez votre message ici..."
