@@ -6,6 +6,7 @@ import {
   Package,
   Plus,
   Upload,
+  Tag,
   Boxes,
   LogOut,
   Menu,
@@ -51,6 +52,11 @@ const AdminLayout = ({ children }) => {
       name: 'Upload en Masse',
       path: '/atelier/upload-masse',
       icon: Upload,
+    },
+    {
+      name: 'Catégories',
+      path: '/atelier/categories',
+      icon: Tag,
     },
     {
       name: 'Gestion du Stock',

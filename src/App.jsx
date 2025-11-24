@@ -23,6 +23,7 @@ import AtelierProducts from './pages/admin/AtelierProducts';
 import AtelierProductNew from './pages/admin/AtelierProductNew';
 import AtelierProductEdit from './pages/admin/AtelierProductEdit';
 import AtelierBulkUpload from './pages/admin/AtelierBulkUpload';
+import AtelierCategories from './pages/admin/AtelierCategories';
 import AtelierStock from './pages/admin/AtelierStock';
 import AtelierOrders from './pages/admin/AtelierOrders';
 import AtelierOrderNew from './pages/admin/AtelierOrderNew';
@@ -73,6 +74,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AtelierBulkUpload />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/atelier/categories"
+              element={
+                <ProtectedRoute>
+                  <AtelierCategories />
                 </ProtectedRoute>
               }
             />
