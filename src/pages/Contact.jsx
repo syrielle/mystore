@@ -70,8 +70,8 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                  <a href="mailto:contact@missbijoux.com" className="text-gray-600 hover:text-gray-900 transition-colors">
-                    contact@missbijoux.com
+                  <a href="mailto:missbijoux761@gmail.com" className="text-gray-600 hover:text-gray-900 transition-colors">
+                    missbijoux761@gmail.com
                   </a>
                 </div>
               </div>
