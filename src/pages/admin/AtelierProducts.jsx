@@ -1,14 +1,17 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { getAllProducts, deleteProduct } from '../../services/firebase/productService';
+import { getAllProducts, deleteProduct, updateProduct } from '../../services/firebase/productService';
 import {
   Plus,
   Search,
   Edit,
   Trash2,
   AlertCircle,
-  Filter
+  Filter,
+  Eye,
+  EyeOff,
+  ZoomIn
 } from 'lucide-react';
 
 const AtelierProducts = () => {
@@ -113,6 +116,30 @@ const AtelierProducts = () => {
       setDeleting(false);
 
       alert(`${successCount} produit(s) supprimé(s) avec succès${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}!`);
+    }
+  };
+
+  // Activer/Désactiver un produit
+  const toggleProductActive = async (productId, currentStatus) => {
+    try {
+      await updateProduct(productId, { isActive: !currentStatus });
+      const updatedProducts = await getAllProducts();
+      setAllProducts(updatedProducts);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      alert('Erreur lors de la mise à jour du statut');
+    }
+  };
+
+  // Mise à jour rapide du stock
+  const handleQuickStockUpdate = async (productId, newStock) => {
+    try {
+      await updateProduct(productId, { stock: parseInt(newStock) });
+      const updatedProducts = await getAllProducts();
+      setAllProducts(updatedProducts);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du stock:', error);
+      alert('Erreur lors de la mise à jour du stock');
     }
   };
 
@@ -247,7 +274,7 @@ const AtelierProducts = () => {
                     const lowStock = stock < 5;
 
                     return (
-                      <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={product.id} className={`hover:bg-gray-50 transition-colors ${product.isActive === false ? 'bg-red-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
                             type="checkbox"
@@ -256,16 +283,26 @@ const AtelierProducts = () => {
                             className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-12 h-12 rounded-lg object-cover shadow-sm"
-                            />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                              <p className="text-xs text-gray-500">ID: {product.id}</p>
+                            <div className="group relative">
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-20 h-20 rounded-lg object-cover shadow-sm cursor-pointer transition-transform group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg transition-all flex items-center justify-center">
+                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                              <p className="text-xs text-gray-500">ID: {product.id.slice(0, 8)}...</p>
+                              {product.isActive === false && (
+                                <span className="inline-flex mt-1 px-2 py-0.5 text-xs font-semibold rounded bg-red-100 text-red-800">
+                                  Inactif
+                                </span>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -279,9 +316,13 @@ const AtelierProducts = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${lowStock ? 'text-red-600' : 'text-gray-900'}`}>
-                              {stock}
-                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={stock}
+                              onChange={(e) => handleQuickStockUpdate(product.id, e.target.value)}
+                              className={`w-16 px-2 py-1 text-sm font-medium border rounded focus:outline-none focus:ring-2 focus:ring-yellow-500 ${lowStock ? 'text-red-600 border-red-300' : 'text-gray-900 border-gray-300'}`}
+                            />
                             {lowStock && (
                               <AlertCircle className="w-4 h-4 text-red-500" />
                             )}
@@ -308,6 +349,13 @@ const AtelierProducts = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => toggleProductActive(product.id, product.isActive !== false)}
+                              className={`p-2 rounded-lg transition-colors ${product.isActive === false ? 'text-green-600 hover:bg-green-50' : 'text-gray-600 hover:bg-gray-100'}`}
+                              title={product.isActive === false ? 'Activer' : 'Désactiver'}
+                            >
+                              {product.isActive === false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            </button>
                             <Link
                               to={`/atelier/produits/modifier/${product.id}`}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

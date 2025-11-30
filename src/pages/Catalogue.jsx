@@ -18,7 +18,9 @@ const Catalogue = () => {
     const loadProducts = async () => {
       try {
         const productsFromFirebase = await getAllProducts();
-        setProducts(productsFromFirebase);
+        // Filtrer uniquement les produits actifs pour le site public
+        const activeProducts = productsFromFirebase.filter(p => p.isActive !== false);
+        setProducts(activeProducts);
       } catch (error) {
         console.error('Erreur lors du chargement des produits:', error);
       } finally {

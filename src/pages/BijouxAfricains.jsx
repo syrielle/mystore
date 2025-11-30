@@ -1,12 +1,33 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Sparkles, Heart, Globe, ShoppingBag } from 'lucide-react';
 import ProductCardSimple from '../components/ui/ProductCardSimple';
-import { products } from '../data/products';
+import { getAllProducts } from '../services/firebase/productService';
 
 const BijouxAfricains = () => {
-  // Filtrer les produits africains
-  const africanProducts = products.filter(p => p.category === 'africain');
+  const [africanProducts, setAfricanProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Charger les produits africains depuis Firebase
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const productsFromFirebase = await getAllProducts();
+        // Filtrer les produits africains actifs uniquement
+        const africans = productsFromFirebase.filter(p =>
+          p.category === 'Bijoux Africains' && p.isActive !== false
+        );
+        setAfricanProducts(africans);
+      } catch (error) {
+        console.error('Erreur lors du chargement des produits:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f5f3f0]">
